@@ -1,21 +1,18 @@
 // register.php - Insecure Registration Page
 <?php
-require 'includes/config.php';
+require 'db.php';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = $_POST['username'];
-    $password = $_POST['password'];
+    $password = $_POST['password']; //Storing password in plain text
 
-    $conn = new SQLite3('db/users.db');
-    $query = "INSERT INTO users (username, password) VALUES ('\$username', '\$password')"; // SQL Injection & Plaintext Password Storage
-    
-    if ($conn->exec($query)) {
-        echo "<script>alert('Registration successful!'); window.location='index.php';</script>"; // Reflected XSS
-    } else {
-        echo "<script>alert('Error registering user');</script>";
-    }
+    $sql = "INSERT INTO users (username, password) VALUES ('$username', '$password')";
+    $pdo->query($sql); // SQL Injection vulnerable
+
+    echo "User registered!";
 }
 ?>
+
 
 <!DOCTYPE html>
 <html>

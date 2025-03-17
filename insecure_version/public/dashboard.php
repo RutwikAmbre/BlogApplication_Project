@@ -1,10 +1,6 @@
 <?php
 session_start();
-
-if (!isset($_SESSION['user'])) {
-    header('Location: index.php');
-    exit;
-}
+setcookie("session_id", session_id(), time() + 3600, "/", "", false, false); // No secure flag
 ?>
 
 <!DOCTYPE html>
