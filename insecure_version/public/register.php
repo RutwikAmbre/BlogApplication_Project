@@ -1,13 +1,13 @@
 // register.php - Insecure Registration Page
 <?php
-require 'db.php';
+require __DIR__ . '/../db/db.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = $_POST['username'];
     $password = $_POST['password']; //Storing password in plain text
 
-    $sql = "INSERT INTO users (username, password) VALUES ('$username', '$password')";
-    $pdo->query($sql); // SQL Injection vulnerable
+    $sql = "INSERT INTO users(username, password) VALUES ('$username', '$password')";
+    $pdo->query($sql); //SQL Injection vulnerable
 
     echo "User registered!";
 }

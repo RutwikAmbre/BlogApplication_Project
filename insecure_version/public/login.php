@@ -1,12 +1,12 @@
 <?php
 session_start();
-require 'db.php';
+require __DIR__ . '/../db/db.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = $_POST['username'];
     $password = $_POST['password'];
 
-    $sql = "SELECT * FROM users WHERE username = '$username' AND password = '$password'"; // ❌ SQL Injection
+    $sql = "SELECT * FROM users WHERE username = '$username' AND password = '$password'"; //  SQL Injection possibility
     $result = $pdo->query($sql);
     $user = $result->fetch();
 
@@ -15,7 +15,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         header("Location: dashboard.php");
         exit;
     } else {
-        // ❌ Reflected XSS: Displaying user input without escaping
+        //  Reflected XSS: Displaying user input without escaping
         header("Location: login.php?error=Invalid credentials");
         exit;
     }
@@ -23,7 +23,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 // Display error message (Reflected XSS vulnerability)
 if (isset($_GET['error'])) {
-    echo "Error: " . $_GET['error']; // ❌ Directly outputting user input
+    echo "Error: " . $_GET['error']; // Directly outputting user input
 }
 ?>
 
