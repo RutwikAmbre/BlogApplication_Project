@@ -9,7 +9,7 @@ setcookie("session_id", session_id(), time() + 3600, "/", "", false, false); // 
     <title>Dashboard</title>
 </head>
 <body>
-    <h2>Welcome, <?php echo $_SESSION['user']; ?>!</h2> <!-- Stored XSS Risk -->
+    <h2>Welcome, <?php echo $_SESSION['username']; ?>!</h2> <!-- Stored XSS Risk -->
     <p>This is your dashboard.</p>
     <a href="logout.php">Logout</a>
 </body>
