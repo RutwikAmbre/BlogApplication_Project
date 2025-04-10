@@ -25,7 +25,7 @@ if (isset($_POST['edit_id'], $_POST['edit_title'], $_POST['edit_content'])) {
     $title = $_POST['edit_title'];
     $content = $_POST['edit_content'];
 
-    // Check if the post belongs to the logged-in user (based on username)
+    // Check if the post belongs to the logged-in user 
     $stmt = $pdo->prepare("SELECT username FROM posts WHERE id = ?");
     $stmt->execute([$id]);
     $post = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -35,7 +35,6 @@ if (isset($_POST['edit_id'], $_POST['edit_title'], $_POST['edit_content'])) {
         $sql = "UPDATE posts SET title = '$title', content = '$content' WHERE id = $id";
         $pdo->exec($sql);
     } else {
-        // Handle error, post doesn't belong to the user
         echo "You can only edit your own posts.";
     }
 }
@@ -44,7 +43,7 @@ if (isset($_POST['edit_id'], $_POST['edit_title'], $_POST['edit_content'])) {
 if (isset($_GET['delete_id'])) {
     $delete_id = $_GET['delete_id'];
 
-    // Check if the post belongs to the logged-in user (based on username)
+    // Check if the post belongs to the logged-in user
     $stmt = $pdo->prepare("SELECT username FROM posts WHERE id = ?");
     $stmt->execute([$delete_id]);
     $post = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -57,7 +56,6 @@ if (isset($_GET['delete_id'])) {
         header("Location: dashboard.php");
         exit;
     } else {
-        // Handle error, post doesn't belong to the user
         echo "You can only delete your own posts.";
     }
 }
