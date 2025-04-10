@@ -1,4 +1,5 @@
 <?php
+//Secure login.php
 session_start();
 require __DIR__ . '/db/db.php';
 
@@ -6,24 +7,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = $_POST['username'];
     $password = $_POST['password'];
 
-    $sql = "SELECT * FROM users WHERE username = '$username' AND password = '$password'"; //  SQL Injection possibility
-    $result = $pdo->query($sql);
-    $user = $result->fetch();
+    // Fix SQL Injection with Prepared Statements
+    $sql = "SELECT * FROM users WHERE username = :username AND password = :password";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([':username' => $username, ':password' => $password]);
+    $user = $stmt->fetch();
 
     if ($user) {
         $_SESSION['username'] = $user['username'];
         header("Location: dashboard.php");
         exit;
     } else {
-        //  Reflected XSS: Displaying user input without escaping
+        // Use a GET parameter to show an error message
         header("Location: login.php?error=Invalid credentials");
         exit;
     }
 }
 
-// Display error message (Reflected XSS vulnerability)
+// Display error message
 if (isset($_GET['error'])) {
-    echo "Error: " . $_GET['error']; // Directly outputting user input
+    echo "Error: " . htmlspecialchars($_GET['error']); // Escape user input to prevent XSS
 }
 ?>
 
@@ -33,7 +36,7 @@ if (isset($_GET['error'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
-    <link rel="stylesheet" href="styles.css"> 
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
