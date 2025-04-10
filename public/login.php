@@ -1,5 +1,5 @@
+// login.php - Secure Login
 <?php
-//Secure login.php
 session_start();
 require __DIR__ . '/db/db.php';
 
@@ -18,13 +18,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         header("Location: dashboard.php");
         exit;
     } else {
-        // Use a GET parameter to show an error message
         header("Location: login.php?error=Invalid credentials");
         exit;
     }
 }
 
-// Display error message (Fix XSS vulnerability by escaping user input)
+// Display error message
 if (isset($_GET['error'])) {
     echo "Error: " . htmlspecialchars($_GET['error']); // Escape user input to prevent XSS
 }
