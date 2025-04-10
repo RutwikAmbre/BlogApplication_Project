@@ -1,6 +1,6 @@
 // register.php - Insecure Registration Page
 <?php
-require __DIR__ . '/../db/db.php';
+require __DIR__ . '/db/db.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = $_POST['username'];

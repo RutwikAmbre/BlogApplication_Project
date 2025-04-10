@@ -1,6 +1,6 @@
 <?php
 session_start();
-require __DIR__ . '/../db/db.php';
+require __DIR__ . '/db/db.php';
 
 if (!isset($_SESSION['username'])) {
     header("Location: login.php");

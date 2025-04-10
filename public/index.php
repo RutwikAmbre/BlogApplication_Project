@@ -1,6 +1,6 @@
 <?php
 session_start();
-require __DIR__ . '/../db/db.php';  // Assuming your db connection is correct
+require __DIR__ . '/db/db.php';  // Assuming your db connection is correct
 
 // Fetch existing posts from the database
 $sql = "SELECT * FROM posts";
