@@ -1,18 +1,22 @@
-// register.php - Insecure Registration Page
 <?php
 require __DIR__ . '/db/db.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = $_POST['username'];
-    $password = $_POST['password']; //Storing password in plain text
+    $password = $_POST['password'];
 
-    $sql = "INSERT INTO users(username, password) VALUES ('$username', '$password')";
-    $pdo->query($sql); //SQL Injection vulnerable
+    // Hash the password using PASSWORD_BCRYPT
+    $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
 
-    echo "User registered!";
+    // Prepare and execute the SQL query using a prepared statement
+    $stmt = $pdo->prepare("INSERT INTO users (username, password) VALUES (:username, :password)");
+    $stmt->bindParam(':username', $username);
+    $stmt->bindParam(':password', $hashedPassword); 
+    $stmt->execute();
+
+    echo "User registered successfully!";
 }
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">

@@ -1,4 +1,3 @@
-// login.php - Secure Login
 <?php
 session_start();
 require __DIR__ . '/db/db.php';
@@ -8,12 +7,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = $_POST['password'];
 
     // Fix SQL Injection with Prepared Statements
-    $sql = "SELECT * FROM users WHERE username = :username AND password = :password";
+    $sql = "SELECT * FROM users WHERE username = :username";
     $stmt = $pdo->prepare($sql);
-    $stmt->execute([':username' => $username, ':password' => $password]);
+    $stmt->execute([':username' => $username]);
     $user = $stmt->fetch();
 
-    if ($user) {
+    // Verify the password using password_verify
+    if ($user && password_verify($password, $user['password'])) {
         $_SESSION['username'] = $user['username'];
         header("Location: dashboard.php");
         exit;
