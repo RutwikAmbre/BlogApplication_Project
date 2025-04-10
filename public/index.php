@@ -2,6 +2,10 @@
 session_start();
 require __DIR__ . '/db/db.php';  
 
+if (!isset($_SESSION['username'])) {
+    session_regenerate_id(true);
+}
+
 // Fetch existing posts from the database
 $sql = "SELECT * FROM posts";
 $stmt = $pdo->query($sql);
