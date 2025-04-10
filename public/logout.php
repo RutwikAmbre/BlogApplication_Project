@@ -1,4 +1,4 @@
-// logout.php - Secure Logout
+// logout.php - secure Logout
 <?php
 session_start();
 

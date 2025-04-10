@@ -1,3 +1,4 @@
+// index.php - Secure HomePage
 <?php
 session_start();
 require __DIR__ . '/db/db.php';  

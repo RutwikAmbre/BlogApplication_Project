@@ -1,66 +1,76 @@
+// dashboard.php - Secure Dashboard
 <?php
 session_start();
 require __DIR__ . '/db/db.php';
 
-if (!isset($_SESSION['username'])) {
-    header("Location: login.php");
-    exit;
+// CSRF token generation and validation
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
-$username = $_SESSION['username']; // Get the current user's username
-
-// Handle new post submission
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['title'], $_POST['content'])) {
-    $title = $_POST['title'];
-    $content = $_POST['content'];
-
-    // Insert post with the current user's username
-    $sql = "INSERT INTO posts (title, content, username) VALUES ('$title', '$content', '$username')";
-    $pdo->exec($sql);
-}
-
-// Handle post update
-if (isset($_POST['edit_id'], $_POST['edit_title'], $_POST['edit_content'])) {
-    $id = $_POST['edit_id'];
-    $title = $_POST['edit_title'];
-    $content = $_POST['edit_content'];
-
-    // Check if the post belongs to the logged-in user 
-    $stmt = $pdo->prepare("SELECT username FROM posts WHERE id = ?");
-    $stmt->execute([$id]);
-    $post = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    if ($post && $post['username'] == $username) {
-        // Update the post
-        $sql = "UPDATE posts SET title = '$title', content = '$content' WHERE id = $id";
-        $pdo->exec($sql);
-    } else {
-        echo "You can only edit your own posts.";
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Check if the CSRF token is valid
+    if ($_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+        die("CSRF validation failed.");
     }
-}
 
-// Handle post delete
-if (isset($_GET['delete_id'])) {
-    $delete_id = $_GET['delete_id'];
+    // Handle new post submission
+    if (isset($_POST['title'], $_POST['content'])) {
+        $title = $_POST['title'];
+        $content = $_POST['content'];
+        $username = $_SESSION['username'];
 
-    // Check if the post belongs to the logged-in user
-    $stmt = $pdo->prepare("SELECT username FROM posts WHERE id = ?");
-    $stmt->execute([$delete_id]);
-    $post = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    if ($post && $post['username'] == $username) {
-        // Delete the post
-        $sql = "DELETE FROM posts WHERE id = $delete_id";
+        // Insert post with the current user's username
+        $sql = "INSERT INTO posts (title, content, username) VALUES ('$title', '$content', '$username')";
         $pdo->exec($sql);
+    }
 
-        header("Location: dashboard.php");
-        exit;
-    } else {
-        echo "You can only delete your own posts.";
+    // Handle post update
+    if (isset($_POST['edit_id'], $_POST['edit_title'], $_POST['edit_content'])) {
+        $id = $_POST['edit_id'];
+        $title = $_POST['edit_title'];
+        $content = $_POST['edit_content'];
+        $username = $_SESSION['username'];
+
+        // Check if the post belongs to the logged-in user 
+        $stmt = $pdo->prepare("SELECT username FROM posts WHERE id = ?");
+        $stmt->execute([$id]);
+        $post = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($post && $post['username'] == $username) {
+            // Update the post
+            $sql = "UPDATE posts SET title = '$title', content = '$content' WHERE id = $id";
+            $pdo->exec($sql);
+        } else {
+            echo "You can only edit your own posts.";
+        }
+    }
+
+    // Handle post delete
+    if (isset($_GET['delete_id'])) {
+        $delete_id = $_GET['delete_id'];
+        $username = $_SESSION['username'];
+
+        // Check if the post belongs to the logged-in user
+        $stmt = $pdo->prepare("SELECT username FROM posts WHERE id = ?");
+        $stmt->execute([$delete_id]);
+        $post = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($post && $post['username'] == $username) {
+            // Delete the post
+            $sql = "DELETE FROM posts WHERE id = $delete_id";
+            $pdo->exec($sql);
+
+            header("Location: dashboard.php");
+            exit;
+        } else {
+            echo "You can only delete your own posts.";
+        }
     }
 }
 
 // Fetch posts for the logged-in user
+$username = $_SESSION['username']; // Get the current user's username
 $stmt = $pdo->prepare("SELECT * FROM posts WHERE username = ? ORDER BY created_at DESC");
 $stmt->execute([$username]);
 $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -115,6 +125,9 @@ $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <!-- Hidden Post Form -->
     <div id="postForm" style="display: none;">
         <form method="POST" class="post-form mb-4">
+            <!-- CSRF Token -->
+            <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+
             <div class="mb-3">
                 <label for="title" class="form-label">Title</label>
                 <input type="text" class="form-control" name="title" required>
