@@ -12,3 +12,7 @@ This project demonstrates both insecure and secure implementations of a PHP logi
    ```sh
    git clone https://github.com/yourusername/php-secure-login.git
    cd php-secure-login
+
+php -S localhost:8000 -t public
+http://localhost:8000/login.php?error=<h1>Session ID: <script>document.write(document.cookie);</script></h1>
+http://localhost:8000/login.php?error=<script>alert('Session ID: ' + document.cookie);</script>
