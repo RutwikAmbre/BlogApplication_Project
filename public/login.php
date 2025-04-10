@@ -7,11 +7,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = $_POST['username'];
     $password = $_POST['password'];
 
-    // Fix SQL Injection with Prepared Statements
-    $sql = "SELECT * FROM users WHERE username = :username AND password = :password";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([':username' => $username, ':password' => $password]);
-    $user = $stmt->fetch();
+    $sql = "SELECT * FROM users WHERE username = '$username' AND password = '$password'"; //  SQL Injection possibility
+    $result = $pdo->query($sql);
+    $user = $result->fetch();
 
     if ($user) {
         $_SESSION['username'] = $user['username'];
@@ -24,9 +22,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 
-// Display error message
+// Display error message (Reflected XSS vulnerability)
 if (isset($_GET['error'])) {
-    echo "Error: " . htmlspecialchars($_GET['error']); // Escape user input to prevent XSS
+    echo "Error: " . $_GET['error']; // Directly outputting user input
 }
 ?>
 
