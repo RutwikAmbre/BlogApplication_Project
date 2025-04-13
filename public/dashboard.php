@@ -3,7 +3,7 @@
 $success_message = '';
 if (isset($_SESSION['success_message'])) {
     $success_message = $_SESSION['success_message'];
-    unset($_SESSION['success_message']); // Clear it after displaying once
+    unset($_SESSION['success_message']);
 }
 
 require __DIR__ . '/db/db.php';

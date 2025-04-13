@@ -1,7 +1,6 @@
 // logout.php - secure Logout
 <?php include 'includes/header.php';
 
-// Proper session termination (destroy session entirely)
 session_unset();  // Unsets all session variables
 session_destroy(); // Destroys the session itself
 

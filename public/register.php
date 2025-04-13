@@ -3,7 +3,7 @@ include 'includes/header.php';
 require __DIR__ . '/db/db.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // ✅ CSRF token validation
+    // CSRF token validation
     if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
         die("CSRF validation failed.");
     }
@@ -37,8 +37,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         echo "User registered successfully!";
     } catch (PDOException $e) {
-        error_log("Error: " . $e->getMessage()); // Log detailed error
-        echo "An error occurred. Please try again later."; // Generic error message
+        error_log("Error: " . $e->getMessage()); // error message
+        echo "An error occurred. Please try again later."; 
     }
 }
 ?>
@@ -56,7 +56,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <div class="container">
     <h2>Register</h2>
     <form action="register.php" method="POST">
-        <!-- ✅ CSRF Token Field -->
+        <!-- CSRF Token Field -->
         <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
 
         <input type="text" name="username" placeholder="Username" required>
