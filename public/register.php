@@ -4,6 +4,19 @@ require __DIR__ . '/db/db.php';
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = $_POST['username'];
     $password = $_POST['password'];
+    $confirm_password = $_POST['confirm_password'];
+
+    // Check if passwords match
+    if ($password !== $confirm_password) {
+        echo "Passwords do not match!";
+        exit;
+    }
+
+    // Check if password is at least 8 characters long
+    if (strlen($password) < 8) {
+        echo "Password must be at least 8 characters long!";
+        exit; 
+    }
 
     // Hash the password using PASSWORD_BCRYPT
     $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
@@ -32,7 +45,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <h2>Register</h2>
     <form action="register.php" method="POST">
         <input type="text" name="username" placeholder="Username" required>
-        <input type="password" name="password" placeholder="Password" required>
+        <input type="password" name="password" placeholder="Password" required minlength="8">
+        <input type="password" name="confirm_password" placeholder="Confirm Password" required minlength="8">
         <button type="submit">Register</button>
         <p>Already have an account? <a href="login.php">Login</a></p>
     </form>
@@ -40,3 +54,4 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 </body>
 </html>
+

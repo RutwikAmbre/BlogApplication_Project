@@ -25,7 +25,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 // Display error message
 if (isset($_GET['error'])) {
-    echo "Error: " . htmlspecialchars($_GET['error']); // Escape user input to prevent XSS
+    echo "<div id='error_message'>Error: " . htmlspecialchars($_GET['error']) . "</div>"; // Escape user input to prevent XSS
 }
 ?>
 
@@ -42,9 +42,9 @@ if (isset($_GET['error'])) {
 <div class="container">
     <h2>Login</h2>
     <form action="login.php" method="POST">
-        <input type="text" name="username" placeholder="Username" required>
-        <input type="password" name="password" placeholder="Password" required>
-        <button type="submit">Login</button>
+        <input id="username" type="text" name="username" placeholder="Username" required>
+        <input id="password" type="password" name="password" placeholder="Password" required>
+        <button id="login_button" type="submit">Login</button>
         <p>Don't have an account? <a href="register.php">Register</a></p>
     </form>
 </div>
