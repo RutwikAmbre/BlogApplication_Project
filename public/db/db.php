@@ -3,7 +3,7 @@
 $dir = __DIR__ . '/../db/users.db';
 
 $dsn = "sqlite:".$dir;
-$pdo = new PDO($dsn); // No error handling
+$pdo = new PDO($dsn);
 
 $createTableQuery = "
 CREATE TABLE IF NOT EXISTS users (
@@ -12,6 +12,6 @@ CREATE TABLE IF NOT EXISTS users (
     password TEXT NOT NULL
 );
 ";
-$pdo->exec($createTableQuery); // Execute the query to create the table
+$pdo->exec($createTableQuery);
 
 ?>

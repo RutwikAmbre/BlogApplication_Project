@@ -1,15 +1,15 @@
 <?php
-// Set cookie parameters FIRST — only if session hasn't started
+
 if (session_status() == PHP_SESSION_NONE) {
     session_set_cookie_params([
         'lifetime' => 0,
         'path' => '/',
-        'domain' => 'localhost', // 👈 No scheme like http://
-        'secure' => false, // 👈 Set to false if you're testing without HTTPS
+        'domain' => 'localhost', 
+        'secure' => false, 
         'httponly' => true,
         'samesite' => 'Strict'
     ]);
-    session_start(); // 👈 Then start the session
+    session_start();
 }
 
 // Security headers
