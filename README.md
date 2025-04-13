@@ -1,7 +1,7 @@
-# PHP Insecure and Secure Login System
+# PHP Insecure and Secure Blog Application System
 
 ## Overview
-This project demonstrates both insecure and secure implementations of a PHP login system using SQLite3.
+This project demonstrates both insecure and secure implementations of a PHP Blog application system using SQLite3.
 
 ## Branches
 - **insecure** → Contains vulnerabilities like SQL Injection, XSS, and weak session management.
@@ -10,16 +10,16 @@ This project demonstrates both insecure and secure implementations of a PHP logi
 ## Installation
 1. **Clone the repository:**
 
-git clone https://github.com/yourusername/php-secure-login.git
-cd php-secure-login
+   git clone https://github.com/yourusername/php-secure-login.git
+   cd php-secure-login
 
 2. Start the PHP server:
 
-php -S localhost:8000 -t public
+   php -S localhost:8000 -t public
 
 3. Open the app in your browser:
 
-http://localhost:8000/index.php
+   http://localhost:8000/index.php
 
 # Testing done
 
