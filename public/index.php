@@ -1,8 +1,13 @@
-// index.php - Secure HomePage
-<?php
-session_start();
-require __DIR__ . '/db/db.php';  
+<?php include 'includes/header.php';
 
+require __DIR__ . '/db/db.php';
+
+// ✅ Generate CSRF token if it doesn't exist
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
+// Regenerate session ID to prevent session fixation attacks
 if (!isset($_SESSION['username'])) {
     session_regenerate_id(true);
 }
@@ -21,7 +26,6 @@ $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <title>Secure App</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEJ3QJq3U2Xh0uYk5y5byfiPf6X2Zyw5OmTg45gs2jqLlhcZybFV92u98K6K6" crossorigin="anonymous">
     <style>
-        
         body {
             background-color: #f8f9fa;
             min-height: 100vh;
@@ -49,7 +53,6 @@ $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
             margin-bottom: 20px;
         }
 
-        
         .post {
             position: absolute;
             background-color: #fff;
@@ -87,10 +90,13 @@ $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <?php endif; ?>
 </div>
 
+<!-- CSRF Token in a hidden form (for actions like POST requests) -->
+<form action="index.php" method="POST" style="display: none;">
+    <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+</form>
+
 <?php
-
 foreach ($posts as $post):
-
     $top = rand(5, 60);  
     $left = rand(5, 90); 
 ?>
@@ -101,4 +107,6 @@ foreach ($posts as $post):
 <?php endforeach; ?>
 
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz4fnFO9gybKQ4fGvhj7qg2B03E6lmZ/JMCp7NfB0IY6dUnX6TT7FZC0d4" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js" integrity="sha384-pzjw8f+ua7Kw1TIq0v8Fq7f7C2
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js" integrity="sha384-pzjw8f+ua7Kw1TIq0v8Fq7f7C2+T8h4bmOkp4A3bHfzMQ+vPxxY4T8gjWf8d5Gtb" crossorigin="anonymous"></script>
+</body>
+</html>

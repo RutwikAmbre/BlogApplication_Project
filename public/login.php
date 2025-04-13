@@ -1,8 +1,18 @@
-<?php
-session_start();
+<?php include 'includes/header.php';
+
 require __DIR__ . '/db/db.php';
 
+// ✅ Generate CSRF token if it doesn't exist
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // ✅ Validate CSRF token
+    if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+        die("CSRF validation failed.");
+    }
+
     $username = $_POST['username'];
     $password = $_POST['password'];
 
@@ -42,6 +52,9 @@ if (isset($_GET['error'])) {
 <div class="container">
     <h2>Login</h2>
     <form action="login.php" method="POST">
+        <!-- ✅ CSRF token field -->
+        <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+        
         <input id="username" type="text" name="username" placeholder="Username" required>
         <input id="password" type="password" name="password" placeholder="Password" required>
         <button id="login_button" type="submit">Login</button>

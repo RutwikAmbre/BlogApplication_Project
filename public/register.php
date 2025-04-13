@@ -1,7 +1,13 @@
-<?php
+<?php 
+include 'includes/header.php';
 require __DIR__ . '/db/db.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // ✅ CSRF token validation
+    if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+        die("CSRF validation failed.");
+    }
+
     $username = $_POST['username'];
     $password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
@@ -44,6 +50,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <div class="container">
     <h2>Register</h2>
     <form action="register.php" method="POST">
+        <!-- ✅ CSRF Token Field -->
+        <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+
         <input type="text" name="username" placeholder="Username" required>
         <input type="password" name="password" placeholder="Password" required minlength="8">
         <input type="password" name="confirm_password" placeholder="Confirm Password" required minlength="8">
@@ -54,4 +63,3 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 </body>
 </html>
-

@@ -1,6 +1,4 @@
-// dashboard.php - Secure Dashboard
-<?php
-session_start();
+<?php include 'includes/header.php';
 
 $success_message = '';
 if (isset($_SESSION['success_message'])) {
@@ -15,7 +13,6 @@ if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
-
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Check if the CSRF token is valid
     if ($_POST['csrf_token'] !== $_SESSION['csrf_token']) {
@@ -28,9 +25,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $content = $_POST['content'];
         $username = $_SESSION['username'];
 
-        // Insert post with the current user's username
-        $sql = "INSERT INTO posts (title, content, username) VALUES ('$title', '$content', '$username')";
-        $pdo->exec($sql);
+        // Use prepared statement for post insertion
+        $sql = "INSERT INTO posts (title, content, username) VALUES (:title, :content, :username)";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([':title' => $title, ':content' => $content, ':username' => $username]);
 
         $success_message = "Post created successfully!";
     }
@@ -40,15 +38,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $delete_id = $_POST['delete_id'];
         $username = $_SESSION['username'];
 
-        // Check if the post belongs to the logged-in user 
-        $stmt = $pdo->prepare("SELECT username FROM posts WHERE id = ?");
-        $stmt->execute([$delete_id]);
+        // Check if the post belongs to the logged-in user using a prepared statement
+        $stmt = $pdo->prepare("SELECT username FROM posts WHERE id = :id");
+        $stmt->execute([':id' => $delete_id]);
         $post = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($post && $post['username'] == $username) {
-            // Delete the post
-            $sql = "DELETE FROM posts WHERE id = $delete_id";
-            $pdo->exec($sql);
+            // Use prepared statement for post deletion
+            $stmt = $pdo->prepare("DELETE FROM posts WHERE id = :id");
+            $stmt->execute([':id' => $delete_id]);
             $_SESSION['success_message'] = "Post deleted successfully!";
         } else {
             $_SESSION['success_message'] = "You can only delete your own posts.";
@@ -62,8 +60,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 // Fetch posts for the logged-in user
 $username = $_SESSION['username']; // Get the current user's username
-$stmt = $pdo->prepare("SELECT * FROM posts WHERE username = ? ORDER BY created_at DESC");
-$stmt->execute([$username]);
+$stmt = $pdo->prepare("SELECT * FROM posts WHERE username = :username ORDER BY created_at DESC");
+$stmt->execute([':username' => $username]);
 $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
