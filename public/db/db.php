@@ -1,5 +1,5 @@
-<?php
-// db.php - Insecure Database Connection
+<?php include 'includes/header.php';
+// db.php - secure Database Connection
 $dir = __DIR__ . '/../db/users.db';
 
 $dsn = "sqlite:".$dir;

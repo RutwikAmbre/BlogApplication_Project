@@ -8,7 +8,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         die("CSRF validation failed.");
     }
 
-    $username = $_POST['username'];
+    // Sanitize inputs to prevent parameter manipulation
+    $username = htmlspecialchars(trim($_POST['username']));
     $password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
 
@@ -27,13 +28,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Hash the password using PASSWORD_BCRYPT
     $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
 
-    // Prepare and execute the SQL query using a prepared statement
-    $stmt = $pdo->prepare("INSERT INTO users (username, password) VALUES (:username, :password)");
-    $stmt->bindParam(':username', $username);
-    $stmt->bindParam(':password', $hashedPassword); 
-    $stmt->execute();
+    try {
+        // Prepare and execute the SQL query using a prepared statement
+        $stmt = $pdo->prepare("INSERT INTO users (username, password) VALUES (:username, :password)");
+        $stmt->bindParam(':username', $username);
+        $stmt->bindParam(':password', $hashedPassword);
+        $stmt->execute();
 
-    echo "User registered successfully!";
+        echo "User registered successfully!";
+    } catch (PDOException $e) {
+        error_log("Error: " . $e->getMessage()); // Log detailed error
+        echo "An error occurred. Please try again later."; // Generic error message
+    }
 }
 ?>
 
