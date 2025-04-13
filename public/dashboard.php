@@ -1,12 +1,20 @@
 // dashboard.php - Secure Dashboard
 <?php
 session_start();
+
+$success_message = '';
+if (isset($_SESSION['success_message'])) {
+    $success_message = $_SESSION['success_message'];
+    unset($_SESSION['success_message']); // Clear it after displaying once
+}
+
 require __DIR__ . '/db/db.php';
 
 // CSRF token generation and validation
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
+
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Check if the CSRF token is valid
@@ -23,35 +31,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // Insert post with the current user's username
         $sql = "INSERT INTO posts (title, content, username) VALUES ('$title', '$content', '$username')";
         $pdo->exec($sql);
+
+        $success_message = "Post created successfully!";
     }
 
-    // Handle post update
-    if (isset($_POST['edit_id'], $_POST['edit_title'], $_POST['edit_content'])) {
-        $id = $_POST['edit_id'];
-        $title = $_POST['edit_title'];
-        $content = $_POST['edit_content'];
+    // Handle post delete (refresh page)
+    if (isset($_POST['delete_id'])) {
+        $delete_id = $_POST['delete_id'];
         $username = $_SESSION['username'];
 
         // Check if the post belongs to the logged-in user 
-        $stmt = $pdo->prepare("SELECT username FROM posts WHERE id = ?");
-        $stmt->execute([$id]);
-        $post = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if ($post && $post['username'] == $username) {
-            // Update the post
-            $sql = "UPDATE posts SET title = '$title', content = '$content' WHERE id = $id";
-            $pdo->exec($sql);
-        } else {
-            echo "You can only edit your own posts.";
-        }
-    }
-
-    // Handle post delete
-    if (isset($_GET['delete_id'])) {
-        $delete_id = $_GET['delete_id'];
-        $username = $_SESSION['username'];
-
-        // Check if the post belongs to the logged-in user
         $stmt = $pdo->prepare("SELECT username FROM posts WHERE id = ?");
         $stmt->execute([$delete_id]);
         $post = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -60,12 +49,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // Delete the post
             $sql = "DELETE FROM posts WHERE id = $delete_id";
             $pdo->exec($sql);
-
-            header("Location: dashboard.php");
-            exit;
+            $_SESSION['success_message'] = "Post deleted successfully!";
         } else {
-            echo "You can only delete your own posts.";
+            $_SESSION['success_message'] = "You can only delete your own posts.";
         }
+
+        // Redirect to refresh the page
+        header("Location: dashboard.php");
+        exit();
     }
 }
 
@@ -120,7 +111,14 @@ $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <a class="logout btn btn-danger mb-3" href="logout.php">Logout</a>
     <h1 class="mb-4">Welcome, <?php echo htmlspecialchars($_SESSION['username']); ?>!</h1>
 
-    <button class="btn btn-primary mb-3" onclick="toggleForm()">Create New Post</button>
+    <!-- Success Message (Post created/deleted) -->
+    <?php if ($success_message): ?>
+    <div class="alert alert-success" id="success_message">
+        <?php echo htmlspecialchars($success_message); ?>
+    </div>
+    <?php endif; ?>
+
+    <button class="btn btn-primary mb-3" id="createPost" onclick="toggleForm()">Create New Post</button>
 
     <!-- Hidden Post Form -->
     <div id="postForm" style="display: none;">
@@ -136,70 +134,31 @@ $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <label for="content" class="form-label">Content</label>
                 <textarea class="form-control" name="content" rows="4" required></textarea>
             </div>
-            <button type="submit" class="btn btn-success">Post</button>
+            <button type="submit" name="submit" class="btn btn-success">Post</button>
         </form>
     </div>
 
     <!-- Display Posts -->
     <?php foreach ($posts as $post): ?>
-        <div class="card">
+        <div class="card" id="post-<?php echo $post['id']; ?>">
             <div class="card-body">
                 <h5 class="card-title"><?php echo htmlspecialchars($post['title']); ?></h5>
                 <p class="card-text"><?php echo nl2br(htmlspecialchars($post['content'])); ?></p>
                 <p class="text-muted"><small>Posted on <?php echo $post['created_at']; ?></small></p>
-                <div class="d-flex gap-2">
-                    <a href="?delete_id=<?php echo $post['id']; ?>" class="btn btn-sm btn-outline-danger">Delete</a>
-                    <button 
-                        class="btn btn-sm btn-outline-primary"
-                        data-bs-toggle="modal"
-                        data-bs-target="#editModal"
-                        onclick="fillEditForm(
-                            <?php echo $post['id']; ?>,
-                            '<?php echo htmlspecialchars(addslashes($post['title'])); ?>',
-                            `<?php echo htmlspecialchars(addslashes($post['content'])); ?>`
-                        )">Edit</button>
-                </div>
+                <form method="POST" style="display:inline;">
+                    <input type="hidden" name="delete_id" value="<?php echo $post['id']; ?>">
+                    <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+                    <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                </form>
             </div>
         </div>
     <?php endforeach; ?>
-</div>
-
-<!-- Edit Modal -->
-<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <form method="POST" class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="editModalLabel">Edit Post</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-          <input type="hidden" name="edit_id" id="edit_id">
-          <div class="mb-3">
-              <label for="edit_title" class="form-label">Title</label>
-              <input type="text" class="form-control" name="edit_title" id="edit_title" required>
-          </div>
-          <div class="mb-3">
-              <label for="edit_content" class="form-label">Content</label>
-              <textarea class="form-control" name="edit_content" id="edit_content" rows="4" required></textarea>
-          </div>
-      </div>
-      <div class="modal-footer">
-        <button type="submit" class="btn btn-primary">Save Changes</button>
-      </div>
-    </form>
-  </div>
 </div>
 
 <script>
     function toggleForm() {
         const form = document.getElementById('postForm');
         form.style.display = form.style.display === 'none' ? 'block' : 'none';
-    }
-
-    function fillEditForm(id, title, content) {
-        document.getElementById('edit_id').value = id;
-        document.getElementById('edit_title').value = title;
-        document.getElementById('edit_content').value = content;
     }
 </script>
 
